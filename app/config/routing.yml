@@ -2,7 +2,3 @@ coa_scrooge:
     resource: "@CoaScroogeBundle/Controller/"
     type:     annotation
     prefix:   /
-
-app:
-    resource: @AppBundle/Controller/
-    type:     annotation

@@ -32,14 +32,35 @@ class Publication
     /** @ORM\Column **/
     private $publicationcomment;
     
-    
-    /**
-     * Get id
-     *
-     * @return integer 
-     */
-    public function getId()
+    function getPublicationcode() 
     {
-        return $this->id;
+        return $this->publicationcode;
     }
+
+    function getCountrycode() 
+    {
+        return $this->countrycode;
+    }
+
+    function getLanguagecode() 
+    {
+        return $this->languagecode;
+    }
+
+    function getTitle() 
+    {
+        return $this->title;
+    }
+
+    function getSize() 
+    {
+        return $this->size;
+    }
+
+    function getPublicationcomment() 
+    {
+        return $this->publicationcomment;
+    }
+
+
 }
