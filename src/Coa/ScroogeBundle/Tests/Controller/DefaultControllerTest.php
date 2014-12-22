@@ -1,6 +1,6 @@
 <?php
 
-namespace AppBundle\Tests\Controller;
+namespace Coa\ScroogeBundle\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -10,8 +10,8 @@ class DefaultControllerTest extends WebTestCase
     {
         $client = static::createClient();
 
-        $crawler = $client->request('GET', '/');
+        $crawler = $client->request('GET', '/hello/Fabien');
 
-        $this->assertTrue($crawler->filter('html:contains("Homepage")')->count() > 0);
+        $this->assertTrue($crawler->filter('html:contains("Hello Fabien")')->count() > 0);
     }
 }
