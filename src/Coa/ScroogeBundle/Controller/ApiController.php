@@ -2,6 +2,7 @@
 
 namespace Coa\ScroogeBundle\Controller;
 
+use Coa\ScroogeBundle\Entity\Entry;
 use Coa\ScroogeBundle\Entity\Issue;
 use Coa\ScroogeBundle\Entity\Publication;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -11,6 +12,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ApiController extends Controller
 {
+    const COA_URL = "http://coa.inducks.org/";
     
     /**
      * @Route("/series/{countrycode}/{localcode}", name="series_detail") 
@@ -27,7 +29,8 @@ class ApiController extends Controller
             '@type' => ['ComicSeries', 'Periodical'],
             'name' => $pub->getTitle(),
             'comment' => $pub->getPublicationcomment(),
-            'inLanguage' => $pub->getLanguagecode()
+            'inLanguage' => $pub->getLanguagecode(),
+            'url' => self::COA_URL . "publication.php?c=" . urlencode($publicationcode),
         ]);
         $r = new Response(json_encode($s));
         $r->headers->set('Content-type', 'application/ld+json');
@@ -59,7 +62,18 @@ class ApiController extends Controller
             ], UrlGeneratorInterface::ABSOLUTE_URL),
             'comment' => $is->getIssuecomment(),
             'pageEnd' => $is->getPages(),
+            'hasPart' => [],
+            'url' => self::COA_URL . "issue.php?c=" . urlencode($is->getIssuecode()),
         ]);
+        /* @var $e Entry */
+        foreach($is->getEntries() as $e) {
+            $i['hasPart'][] = [
+                '@type' => ['ComicStory'],
+                'name' => $e->getTitle(),
+                'inLanguage' => $e->getLanguagecode(),
+                'comment' => $e->getEntrycomment()
+            ];
+        }
         $r = new Response(json_encode($i));
         $r->headers->set('Content-type', 'application/ld+json');
         return $r;

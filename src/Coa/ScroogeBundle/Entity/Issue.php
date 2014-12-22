@@ -44,6 +44,13 @@ class Issue
     /** @ORM\Column **/
     private $issuecomment;
     
+    /**
+     *
+     * @ORM\OneToMany(targetEntity="Entry", mappedBy="issue")
+     * @ORM\OrderBy({"position"="ASC"})
+     */
+    private $entries;
+    
     function getIssuecode() {
         return $this->issuecode;
     }
@@ -88,6 +95,9 @@ class Issue
         return $this->issuecomment;
     }
 
+    function getEntries() {
+        return $this->entries;
+    }
 
 
 }
