@@ -32,6 +32,12 @@ class Entry
      */
     private $storyversion;
     
+    /**
+     * @ORM\OneToMany(targetEntity="EntryUrl", mappedBy="entry")
+     * @ORM\OrderBy({"pagenumber"="ASC"})
+     */
+    private $urls;
+    
     /** @ORM\Column **/
     private $languagecode;
     /** @ORM\Column **/
@@ -153,7 +159,13 @@ class Entry
         return $this->entrycomment;
     }
 
-
+    public function getThumbnailUrl() 
+    {
+        if($this->urls && count($this->urls) > 0) {
+            $first = $this->urls[0];
+            return $first->generateUrl();
+        }
+    }
     
 //         entrycode varchar(22),
 //    issuecode varchar(17),

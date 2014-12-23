@@ -45,6 +45,11 @@ class Issue
     private $issuecomment;
     
     /**
+     * @ORM\OneToMany(targetEntity="IssueUrl", mappedBy="issue")
+     */
+    private $urls;
+    
+    /**
      *
      * @ORM\OneToMany(targetEntity="Entry", mappedBy="issue")
      * @ORM\OrderBy({"position"="ASC"})
@@ -99,5 +104,16 @@ class Issue
         return $this->entries;
     }
 
+    public function getThumbnailUrl() 
+    {
+        if($this->urls && count($this->urls) > 0) {
+            $first = $this->urls[0];
+            return $first->generateUrl();
+        }
+        if($this->entries && count($this->entries) > 0) {
+            $first = $this->entries[0];
+            return $first->getThumbnailUrl();
+        }
+    }
 
 }

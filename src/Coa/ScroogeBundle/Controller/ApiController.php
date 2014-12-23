@@ -60,11 +60,12 @@ class ApiController extends Controller
             'datePublished' => $is->getOldestdate(),
             'isPartOf' => $this->generateUrl('series_detail', [
                 'countrycode' => $countrycode, 
-                'localcode' => $localcode
+                'localcode' => urlencode($localcode)
             ], UrlGeneratorInterface::ABSOLUTE_URL),
             'comment' => $is->getIssuecomment(),
             'pageEnd' => $is->getPages(),
             'hasPart' => [],
+            'thumbnailUrl' => $is->getThumbnailUrl(),
             'url' => self::COA_URL . "issue.php?c=" . urlencode($is->getIssuecode()),
         ]);
         /* @var $e Entry */
@@ -82,12 +83,13 @@ class ApiController extends Controller
                 'comment' => $e->getEntrycomment(),
                 'position' => $e->getPosition(),
                 'genre' => $genre ? [$genre] : [],
+                'thumbnailUrl' => $e->getThumbnailUrl(),
             ];
             
             if($e->getStoryversion()->getStory()) {
                 $story = $e->getStoryversion()->getStory();
                 $rec['workExample'] = $this->generateUrl('story_detail', [
-                    'storycode' => $story->getStorycode()
+                    'storycode' => urlencode($story->getStorycode())
                     ], UrlGeneratorInterface::ABSOLUTE_URL);
                 if($story->getTitle() != $e->getTitle()) {
                     $rec['alternateName'] = $story->getTitle();
