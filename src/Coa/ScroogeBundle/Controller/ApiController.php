@@ -56,6 +56,8 @@ class ApiController extends Controller
         $i = $this->toJson([
             '@type' => ['ComicIssue', 'PublicationIssue'],
             'name' => $is->getTitle(),
+            'issueNumber' => $is->getIssuenumber(),
+            'datePublished' => $is->getOldestdate(),
             'isPartOf' => $this->generateUrl('series_detail', [
                 'countrycode' => $countrycode, 
                 'localcode' => $localcode
@@ -67,16 +69,44 @@ class ApiController extends Controller
         ]);
         /* @var $e Entry */
         foreach($is->getEntries() as $e) {
-            $i['hasPart'][] = [
-                '@type' => ['ComicStory'],
+            $type = $e->getStoryversion()->isArticle() ? 'Article' : 'ComicStory';
+            $genre = null;
+            if($e->getStoryversion()->isGag()) $genre = 'gag';
+            elseif($e->getStoryversion()->isCover()) $genre = 'cover';
+            elseif($e->getStoryversion()->isIllustration()) $genre = 'illustration';
+            
+            $rec = [
+                '@type' => [$type],
                 'name' => $e->getTitle(),
                 'inLanguage' => $e->getLanguagecode(),
-                'comment' => $e->getEntrycomment()
+                'comment' => $e->getEntrycomment(),
+                'position' => $e->getPosition(),
+                'genre' => $genre ? [$genre] : [],
             ];
+            
+            if($e->getStoryversion()->getStory()) {
+                $story = $e->getStoryversion()->getStory();
+                $rec['workExample'] = $this->generateUrl('story_detail', [
+                    'storycode' => $story->getStorycode()
+                    ], UrlGeneratorInterface::ABSOLUTE_URL);
+                if($story->getTitle() != $e->getTitle()) {
+                    $rec['alternateName'] = $story->getTitle();
+                }
+            }
+            
+            $i['hasPart'][] = $rec;
         }
         $r = new Response(json_encode($i));
         $r->headers->set('Content-type', 'application/ld+json');
         return $r;
+    }
+    
+    /**
+     * @Route("/stories/{storycode}", name="story_detail") 
+     */
+    public function storyDetailAction($storycode)
+    {
+        
     }
     
     /**

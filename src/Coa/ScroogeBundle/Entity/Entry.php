@@ -26,6 +26,10 @@ class Entry
      */
     private $issue;
     
+    /**
+     * @ORM\ManyToOne(targetEntity="StoryVersion")
+     * @ORM\JoinColumn(name="storyversioncode", referencedColumnName="storyversioncode")
+     */
     private $storyversion;
     
     /** @ORM\Column **/
