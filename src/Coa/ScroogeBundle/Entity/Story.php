@@ -44,6 +44,11 @@ class Story
      */
     private $issueofstoryitem;
     
+    /**
+     * @ORM\OneToMany(targetEntity="StoryVersion", mappedBy="story")
+     */
+    private $versions;
+    
 //    originalstoryversioncode varchar(19),
 //    creationdate varchar(21),
 //    firstpublicationdate varchar(10),
@@ -94,5 +99,8 @@ class Story
         return $this->issueofstoryitem;
     }
 
+    public function getVersions() {
+        return $this->versions;
+    }
 
 }

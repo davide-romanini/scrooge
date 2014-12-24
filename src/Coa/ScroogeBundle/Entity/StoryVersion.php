@@ -26,6 +26,11 @@ class StoryVersion
      */
     private $story;
     
+    /**
+     * @ORM\OneToMany(targetEntity="Entry", mappedBy="storyversion")
+     */
+    private $entries;
+    
     /** @ORM\Column **/
     private $entirepages;
     /** @ORM\Column **/
@@ -98,7 +103,13 @@ class StoryVersion
     function getColumnsperpage() {
         return $this->columnsperpage;
     }
+    
+    public function getEntries() {
+        return $this->entries;
+    }
 
+        
+    
     public function isCover()
     {
         return $this->kind == 'c';

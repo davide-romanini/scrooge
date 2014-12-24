@@ -5,6 +5,7 @@ namespace Coa\ScroogeBundle\Controller;
 use Coa\ScroogeBundle\Entity\Entry;
 use Coa\ScroogeBundle\Entity\Issue;
 use Coa\ScroogeBundle\Entity\Publication;
+use Coa\ScroogeBundle\Entity\Story;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,7 +39,7 @@ class ApiController extends Controller
     }
     
     /**
-     * @Route("/series/{countrycode}/{localcode}/issues/{issuenumber}") 
+     * @Route("/series/{countrycode}/{localcode}/issues/{issuenumber}", name="issue_detail") 
      */
     public function issueDetailsAction($countrycode, $localcode, $issuenumber)
     {
@@ -86,9 +87,9 @@ class ApiController extends Controller
                 'thumbnailUrl' => $e->getThumbnailUrl(),
             ];
             
-            if($e->getStoryversion()->getStory()) {
+            if($e->getStoryversion()->getStory()->getStorycode()) {
                 $story = $e->getStoryversion()->getStory();
-                $rec['workExample'] = $this->generateUrl('story_detail', [
+                $rec['exampleOfWork'] = $this->generateUrl('story_detail', [
                     'storycode' => urlencode($story->getStorycode())
                     ], UrlGeneratorInterface::ABSOLUTE_URL);
                 if($story->getTitle() != $e->getTitle()) {
@@ -108,7 +109,37 @@ class ApiController extends Controller
      */
     public function storyDetailAction($storycode)
     {
+        /* @var $story Story */
+        $story = $this->getDoctrine()->getManager()->getRepository("CoaScroogeBundle:Story")
+                ->find(urldecode($storycode));
+        if(!$story) throw $this->createNotFoundException("The story [$storycode] does not exist");
         
+        $s = $this->toJson([
+            '@type' => ['ComicStory', 'CreativeWork'],
+            'name' => $story->getTitle(),
+            'comment' => $story->getStorycomment(),
+            'dateCreated' => $story->getCreationdate(),
+            'datePublished' => $story->getFirstpublicationdate(),
+            'workExample' => [],
+            'url' => self::COA_URL . "story.php?c=" . urlencode($story->getStorycode()),
+        ]);
+        foreach($story->getVersions() as $v) {
+            foreach($v->getEntries() as $e) {
+                list($countrycode, $localcode) = explode('/', $e->getIssue()->getPublication()->getPublicationcode());
+                $s['workExample'][] = [
+                    '@type' => ['ComicStory', 'CreativeWork'],
+                    'name' => $e->getTitle(),
+                    'isPartOf' => $this->generateUrl('issue_detail', [
+                        'countrycode' => urlencode($countrycode),
+                        'localcode' => urlencode($localcode),
+                        'issuenumber' => $e->getIssue()->getIssuenumber(),
+                        ], UrlGeneratorInterface::ABSOLUTE_URL)
+                ];
+            }
+        }
+        $r = new Response(json_encode($s));
+        $r->headers->set('Content-type', 'application/ld+json');
+        return $r;
     }
     
     /**
