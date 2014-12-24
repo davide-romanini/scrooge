@@ -11,9 +11,9 @@ classes defined in the (draft) comic extensions described here:
 
 Examples:
 
-`/series/us/US` -> Uncle Scrooge series 
-`/series/us/US/issues/5` -> Issue #5 for Uncle Scrooge (with contained story informations)
-`/stories/W+US++++5-02 -> "The secret of Atlantis" Carl Barks story (with backlinks to issues printing it)
+ - `/series/us/US` -> Uncle Scrooge series 
+ - `/series/us/US/issues/5` -> Issue #5 for Uncle Scrooge (with contained story informations)
+ - `/stories/W+US++++5-02` -> "The secret of Atlantis" Carl Barks story (with backlinks to issues printing it)
 
 Installation
 ------------
