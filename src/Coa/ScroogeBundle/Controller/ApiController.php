@@ -8,6 +8,7 @@ use Coa\ScroogeBundle\Entity\Publication;
 use Coa\ScroogeBundle\Entity\Story;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -34,6 +35,33 @@ class ApiController extends Controller
             'url' => self::COA_URL . "publication.php?c=" . urlencode($publicationcode),
         ]);
         $r = new Response(json_encode($s));
+        $r->headers->set('Content-type', 'application/ld+json');
+        return $r;
+    }
+    
+    /**
+     * @Route("/stories/", name="story_list") 
+     */
+    public function storyListAction(Request $req)
+    {
+        $q = $req->get('q');
+        $rsm = new \Doctrine\ORM\Query\ResultSetMappingBuilder($this->getDoctrine()->getManager());
+        $rsm->addRootEntityFromClassMetadata('CoaScroogeBundle:Story', 's');
+        $stories = $this->getDoctrine()->getManager()
+            ->createNativeQuery("SELECT s.* FROM inducks_story s, story_fts s1 WHERE s.storycode=s1.storycode AND s1.content MATCH :q", $rsm)
+            ->setParameter('q', $q)
+            ->getResult();
+        $ret = [];
+        foreach($stories as $s) {
+            $ret[] = [
+                '@type' => 'ComicStory',
+                '@id' => $this->generateUrl('story_detail', [
+                    'storycode' => urlencode($s->getStorycode())
+                ], UrlGeneratorInterface::ABSOLUTE_URL),
+                'name' => $s->getTitle(),
+            ];
+        }
+        $r = new Response(json_encode($ret));
         $r->headers->set('Content-type', 'application/ld+json');
         return $r;
     }
