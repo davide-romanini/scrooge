@@ -13,7 +13,10 @@ Examples:
 
  - `/series/us/US` -> Uncle Scrooge series 
  - `/series/us/US/issues/5` -> Issue #5 for Uncle Scrooge (with contained story informations)
+ - `/series/?q=uncle+scrooge` -> Search series containing the terms uncle scrooge in the title
  - `/stories/W+US++++5-02` -> "The secret of Atlantis" Carl Barks story (with backlinks to issues printing it)
+ - `/stories/?q=atlantis` -> Search stories containing the term atlantis in the title. Looks also for translated titles in related entries
+
 
 Installation
 ------------
@@ -25,17 +28,20 @@ be imported and converted to sqlite3. You can use the script located here:
 
 Read the script comments for usage.
 
+For full text indexing, run the inducks_fts.sql script after importing data.
+
 TODO:
 ----
 
- - export author informations (penciler, inkers etc..)
  - export character informations
- - support full text searches for the various entities
+ - general architecture cleanup
+ - refine model mapping
+ - automate database import
 
 Contribute:
 ----------
 
-Try it, host it, fork it!
+Try it, host it, fork it! If you have suggestions, open an issue!
 
 Disclaimer:
 ----------
