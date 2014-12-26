@@ -16,6 +16,35 @@ class ApiController extends Controller
 {
     const COA_URL = "http://coa.inducks.org/";
     
+    
+    /**
+     * @Route("/series/", name="series_list") 
+     */
+    public function seriesListAction(Request $req)
+    {
+        $q = $req->get('q');
+        $rsm = new \Doctrine\ORM\Query\ResultSetMappingBuilder($this->getDoctrine()->getManager());
+        $rsm->addRootEntityFromClassMetadata('CoaScroogeBundle:Publication', 'p');
+        $series = $this->getDoctrine()->getManager()
+            ->createNativeQuery("SELECT p.* FROM inducks_publication p, publication_fts p1 WHERE p.publicationcode=p1.publicationcode AND p1.content MATCH :q", $rsm)
+            ->setParameter('q', $q)
+            ->getResult();
+        $ret = [];
+        foreach($series as $s) {
+            list($countrycode, $localcode) = explode('/', $s->getPublicationcode());
+            $ret[] = [
+                '@type' => 'ComicSeries',
+                '@id' => $this->generateUrl('series_detail', [
+                    'countrycode' => urlencode($countrycode),
+                    'localcode' => urlencode($localcode)
+                ], UrlGeneratorInterface::ABSOLUTE_URL),
+                'name' => $s->getTitle(),
+            ];
+        }
+        $r = new Response(json_encode($ret));
+        $r->headers->set('Content-type', 'application/ld+json');
+        return $r;
+    }
     /**
      * @Route("/series/{countrycode}/{localcode}", name="series_detail") 
      */
