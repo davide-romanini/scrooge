@@ -31,6 +31,12 @@ class StoryVersion
      */
     private $entries;
     
+    /**
+     *
+     * @ORM\OneToMany(targetEntity="StoryJob", mappedBy="storyversion")
+     */
+    private $jobs;
+    
     /** @ORM\Column **/
     private $entirepages;
     /** @ORM\Column **/
@@ -108,8 +114,11 @@ class StoryVersion
         return $this->entries;
     }
 
+    public function getJobs() {
+        return $this->jobs;
+    }
+
         
-    
     public function isCover()
     {
         return $this->kind == 'c';

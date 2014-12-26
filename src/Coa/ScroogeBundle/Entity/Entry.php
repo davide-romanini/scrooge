@@ -38,6 +38,11 @@ class Entry
      */
     private $urls;
     
+    /**
+     * @ORM\OneToMany(targetEntity="EntryJob", mappedBy="entry")
+     */
+    private $jobs;
+    
     /** @ORM\Column **/
     private $languagecode;
     /** @ORM\Column **/
@@ -158,7 +163,17 @@ class Entry
     function getEntrycomment() {
         return $this->entrycomment;
     }
+    
+    public function getUrls() {
+        return $this->urls;
+    }
 
+    public function getJobs() {
+        return $this->jobs;
+    }
+
+        
+    
     public function getThumbnailUrl() 
     {
         if($this->urls && count($this->urls) > 0) {

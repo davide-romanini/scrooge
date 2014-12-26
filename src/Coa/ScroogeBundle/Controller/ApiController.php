@@ -85,6 +85,7 @@ class ApiController extends Controller
                 'position' => $e->getPosition(),
                 'genre' => $genre ? [$genre] : [],
                 'thumbnailUrl' => $e->getThumbnailUrl(),
+                'author' => [],
             ];
             
             if($e->getStoryversion()->getStory()->getStorycode()) {
@@ -95,6 +96,19 @@ class ApiController extends Controller
                 if($story->getTitle() != $e->getTitle()) {
                     $rec['alternateName'] = $story->getTitle();
                 }
+            }
+            foreach($e->getJobs() as $j) {
+                $rec['author'][] = [
+                    '@type' => 'Role',
+                    'roleName' => $j->getRoleName(),
+                    'author' => [
+                        '@type' => 'Person',
+                        '@id' => $this->generateUrl('person_detail', [
+                            'personcode' => urlencode($j->getPerson()->getPersoncode())
+                        ], UrlGeneratorInterface::ABSOLUTE_URL),
+                        'name' => $j->getPerson()->getFullname()
+                    ]
+                ];
             }
             
             $i['hasPart'][] = $rec;
@@ -121,9 +135,24 @@ class ApiController extends Controller
             'dateCreated' => $story->getCreationdate(),
             'datePublished' => $story->getFirstpublicationdate(),
             'workExample' => [],
+            'author' => [],
             'url' => self::COA_URL . "story.php?c=" . urlencode($story->getStorycode()),
         ]);
+        foreach($story->getOriginalstoryversion()->getJobs() as $j) {
+                $s['author'][] = [
+                    '@type' => 'Role',
+                    'roleName' => $j->getRoleName(),
+                    'author' => [
+                        '@type' => 'Person',
+                        '@id' => $this->generateUrl('person_detail', [
+                            'personcode' => urlencode($j->getPerson()->getPersoncode())
+                        ], UrlGeneratorInterface::ABSOLUTE_URL),
+                        'name' => $j->getPerson()->getFullname()
+                    ]
+                ];
+        }
         foreach($story->getVersions() as $v) {
+            
             foreach($v->getEntries() as $e) {
                 list($countrycode, $localcode) = explode('/', $e->getIssue()->getPublication()->getPublicationcode());
                 $s['workExample'][] = [
@@ -140,6 +169,13 @@ class ApiController extends Controller
         $r = new Response(json_encode($s));
         $r->headers->set('Content-type', 'application/ld+json');
         return $r;
+    }
+    
+    /**
+     * @Route("/authors/{personcode}", name="person_detail") 
+     */
+    public function personDetailAction($personcode)
+    {
     }
     
     /**
