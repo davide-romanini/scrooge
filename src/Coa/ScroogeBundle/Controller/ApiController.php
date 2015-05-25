@@ -12,13 +12,16 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+/**
+ * @Route("/", defaults={"_format": "json"})
+ */
 class ApiController extends Controller
 {
     const COA_URL = "http://coa.inducks.org/";
     
     
     /**
-     * @Route("/series/", name="series_list") 
+     * @Route("series/", name="series_list") 
      */
     public function seriesListAction(Request $req)
     {
@@ -46,7 +49,7 @@ class ApiController extends Controller
         return $r;
     }
     /**
-     * @Route("/series/{countrycode}/{localcode}", name="series_detail") 
+     * @Route("series/{countrycode}/{localcode}", name="series_detail") 
      */
     public function seriesDetailAction($countrycode, $localcode)
     {
@@ -96,7 +99,7 @@ class ApiController extends Controller
     }
     
     /**
-     * @Route("/series/{countrycode}/{localcode}/issues/{issuenumber}", name="issue_detail") 
+     * @Route("series/{countrycode}/{localcode}/issues/{issuenumber}", name="issue_detail") 
      */
     public function issueDetailsAction($countrycode, $localcode, $issuenumber)
     {
