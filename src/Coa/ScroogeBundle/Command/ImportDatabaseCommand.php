@@ -30,24 +30,31 @@ class ImportDatabaseCommand extends ContainerAwareCommand
     {
         $this->setName('coa:import');
         $this->addOption('uri', null, InputOption::VALUE_OPTIONAL, 'use a different location for isv files');
+        $this->addOption('db', null, InputOption::VALUE_OPTIONAL, 'use an already initialized database');
+        $this->addOption('tables', null, InputOption::VALUE_OPTIONAL, 'import specified comma separated tables');
     }
 
     protected function execute(InputInterface $input,
                                OutputInterface $output)
     {
+        $db = $input->getOption('db');
+        $tables = $input->hasOption('tables') ? explode(',', $input->getOption('tables')) : null;
         $uri = "http://coa.inducks.org/inducks/isv";
         if ($input->getOption('uri')) {
             $uri = $input->getOption('uri');
         }
-        $dbTempFile = tempnam(sys_get_temp_dir(), 'coa_');
-        $output->writeln("Creating database schema into [$dbTempFile]");
-        $this->initDb($dbTempFile);
+        if (!$db) {
+            $db = tempnam(sys_get_temp_dir(), 'coa_');
+            $output->writeln("Creating database schema into [$dbTempFile]");
+            $this->initDb($db);
+        } else {
+            $this->initDb($db, false);
+        }
         $output->writeln('Retrieving isv list from [' . $uri . ']');
         $isvList = $this->retrieveIsvList($uri);
         foreach ($isvList as $isv) {
             $output->writeln("Importing [$isv]...");
-            $this->import($isv, $output);
-            break;
+            $this->import($isv, $output, $tables);
         }
         $output->writeln('Generating Full Text Indexes...');
         $fts = file_get_contents($this->getContainer()->getParameter('kernel.root_dir') . '/inducks_fts.sql');
@@ -57,11 +64,11 @@ class ImportDatabaseCommand extends ContainerAwareCommand
         $this->db->close();
         $prodDb = $this->getContainer()->getParameter('database_path');
         $output->writeln('Replacing production database');
-        rename($dbTempFile, $prodDb);
+        rename($db, $prodDb);
 
     }
 
-    private function initDb($dbFile)
+    private function initDb($dbFile, $createSchema = true)
     {
         $c = new Configuration();
 //        $c->setAutoCommit(false);
@@ -70,23 +77,28 @@ class ImportDatabaseCommand extends ContainerAwareCommand
             'path' => $dbFile
         ];
         $this->db = DriverManager::getConnection($params, $c);
-        $schema = file_get_contents($this->getContainer()->getParameter('kernel.root_dir') . '/inducks_sqlite.sql');
-        $this->db->beginTransaction();
-        $this->db->exec($schema);
-        $this->db->commit();
-
+        if ($createSchema) {
+            $schema = file_get_contents($this->getContainer()->getParameter('kernel.root_dir') . '/inducks_sqlite.sql');
+            $this->db->beginTransaction();
+            $this->db->exec($schema);
+            $this->db->commit();
+        }
     }
 
-    private function import($isv, $out)
+    private function import($isv, $out, $tables = null)
     {
+        $table = basename($isv, '.isv');
+        if ($tables != null && !in_array($table, $tables)) {
+            $out->writeln("Skipping table $table, not in list");
+            return;
+        }
         /* @var $progress ProgressBar */
         $progress = $this->getHelper('progress');
         $progress->setFormat(ProgressHelper::FORMAT_VERBOSE_NOMAX);
         $progress->setRedrawFrequency(5000);
         $c = 0;
         $f = fopen($isv, 'r');
-        stream_set_read_buffer($f, 2048 * 1000);
-        $table = basename($isv, '.isv');
+        stream_set_read_buffer($f, 2048 * 1000);       
         try {
             $header = [];
             $this->db->beginTransaction();
@@ -97,6 +109,9 @@ class ImportDatabaseCommand extends ContainerAwareCommand
                 if (empty($header)) {
                     $header = $fields;
                     continue;
+                }
+                if (count($header) != count($fields)) {
+                    $fields = array_pad($fields, count($header), null);
                 }
                 $data = array_combine($header, $fields);
                 $this->db->insert($table, $data);

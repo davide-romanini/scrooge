@@ -31,7 +31,17 @@ class Publication
     private $size;
     /** @ORM\Column **/
     private $publicationcomment;
-    
+
+    /**
+     * @ORM\OneToMany(targetEntity="PublicationName", mappedBy="publicationcode")
+     */
+    private $names;
+
+    /**
+     * @ORM\OneToMany(targetEntity="PublicationCategory", mappedBy="publicationcode")
+     */
+    private $categories;
+
     function getPublicationcode() 
     {
         return $this->publicationcode;
@@ -62,5 +72,14 @@ class Publication
         return $this->publicationcomment;
     }
 
+    function getNames()
+    {
+        return $this->names;
+    }
+
+    function getCategories()
+    {
+        return $this->categories;
+    }
 
 }

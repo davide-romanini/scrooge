@@ -41,7 +41,7 @@ class ApiController extends Controller
                     'countrycode' => urlencode($countrycode),
                     'localcode' => urlencode($localcode)
                 ], UrlGeneratorInterface::ABSOLUTE_URL),
-                'name' => $s->getTitle(),
+                'name' => $s->getTitle(),                
             ];
         }
         $r = new Response(json_encode($ret));
@@ -57,15 +57,37 @@ class ApiController extends Controller
         /* @var $pub Publication */
         $pub = $this->getDoctrine()->getManager()->getRepository("CoaScroogeBundle:Publication")
                 ->find($publicationcode);
+        $rsm = new \Doctrine\ORM\Query\ResultSetMappingBuilder($this->getDoctrine()->getManager());
+        $rsm->addScalarResult('publisherid', 'publisherid');
+
         if(!$pub) throw $this->createNotFoundException("The series [$publicationcode] does not exist");
-        
+
+        $publishers = $this->getDoctrine()->getManager()
+            ->createNativeQuery("select distinct pj.publisherid
+from inducks_publishingjob pj, inducks_issue i where i.issuecode=pj.issuecode
+and i.publicationcode=:code", $rsm)
+            ->setParameter('code', $publicationcode)
+            ->getResult();
+
         $s = $this->toJson([
-            '@type' => ['ComicSeries', 'Periodical'],
+            '@type' => ['ComicSeries', 'Product'],
+            'dc:identifier' => $pub->getPublicationcode(),
+            'dc:format' => $pub->getSize(),
             'name' => $pub->getTitle(),
+            'cbo:country' => $pub->getCountrycode(),
             'comment' => $pub->getPublicationcomment(),
             'inLanguage' => $pub->getLanguagecode(),
             'url' => self::COA_URL . "publication.php?c=" . urlencode($publicationcode),
         ]);
+        foreach ($pub->getNames() as $n) {
+            $s['alternateName'][] = $n->getPublicationname();
+        }
+        foreach ($pub->getCategories() as $c) {
+            $s['category'][] = $c->getCategory();
+        }
+        foreach ($publishers as $p) {
+            $s['publisher'][] = $p['publisherid'];
+        }
         $r = new Response(json_encode($s));
         $r->headers->set('Content-type', 'application/ld+json');
         return $r;
@@ -119,12 +141,15 @@ class ApiController extends Controller
             'name' => $is->getTitle(),
             'issueNumber' => $is->getIssuenumber(),
             'datePublished' => $is->getOldestdate(),
-            'isPartOf' => $this->generateUrl('series_detail', [
-                'countrycode' => $countrycode, 
-                'localcode' => urlencode($localcode)
-            ], UrlGeneratorInterface::ABSOLUTE_URL),
+            'isPartOf' => [
+                '@id' => $this->generateUrl('series_detail', [
+                    'countrycode' => $countrycode,
+                    'localcode' => urlencode($localcode)
+                ], UrlGeneratorInterface::ABSOLUTE_URL),
+                'name' => $is->getPublication()->getTitle()
+            ],
             'comment' => $is->getIssuecomment(),
-            'pageEnd' => $is->getPages(),
+            'pagination' => $is->getPages(),
             'hasPart' => [],
             'thumbnailUrl' => $is->getThumbnailUrl(),
             'url' => self::COA_URL . "issue.php?c=" . urlencode($is->getIssuecode()),
@@ -245,7 +270,11 @@ class ApiController extends Controller
      */
     protected function toJson(array $a) 
     {
-        $a["@context"] = "http://schema.org/";
+        $a["@context"] = [
+            '@vocab' => "http://bib.schema.org/",
+            'cbo' => "http://comicmeta.org/cbo/",
+            'dc' => "http://purl.org/dc/elements/1.1/",
+        ];
         return $a;
     }
 }
