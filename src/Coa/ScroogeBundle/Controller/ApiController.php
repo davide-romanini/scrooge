@@ -137,7 +137,7 @@ and i.publicationcode=:code", $rsm)
         $is = $is[0];
         
         $i = $this->toJson([
-            '@type' => ['ComicIssue', 'PublicationIssue'],
+            '@type' => 'ComicIssue',
             'name' => $is->getTitle(),
             'issueNumber' => $is->getIssuenumber(),
             'datePublished' => $is->getOldestdate(),
@@ -146,6 +146,7 @@ and i.publicationcode=:code", $rsm)
                     'countrycode' => $countrycode,
                     'localcode' => urlencode($localcode)
                 ], UrlGeneratorInterface::ABSOLUTE_URL),
+                '@type' => 'ComicSeries',
                 'name' => $is->getPublication()->getTitle()
             ],
             'comment' => $is->getIssuecomment(),
@@ -156,19 +157,27 @@ and i.publicationcode=:code", $rsm)
         ]);
         /* @var $e Entry */
         foreach($is->getEntries() as $e) {
-            $type = $e->getStoryversion()->isArticle() ? 'Article' : 'ComicStory';
-            $genre = null;
-            if($e->getStoryversion()->isGag()) $genre = 'gag';
-            elseif($e->getStoryversion()->isCover()) $genre = 'cover';
-            elseif($e->getStoryversion()->isIllustration()) $genre = 'illustration';
-            
+            $type = '';
+            if ($e->getStoryversion()->isArticle()) {
+                $type = 'Article';
+            } elseif ($e->getStoryversion()->isCover()) {
+                $type = "ComicCoverArt";
+            } elseif ($e->getStoryversion()->isIllustration()) {
+                $type = "VisualArtwork";
+            } else {
+                // a story by default
+                $type = "ComicStory";
+            }
+
             $rec = [
-                '@type' => [$type],
+                '@type' => $type,
+                'dc:identifier' => $e->getStoryversion()->getStory() ?
+                                   $e->getStoryversion()->getStory()->getStorycode() :
+                                   $e->getStoryversion()->getStoryversioncode(),
                 'name' => $e->getTitle(),
                 'inLanguage' => $e->getLanguagecode(),
                 'comment' => $e->getEntrycomment(),
                 'position' => $e->getPosition(),
-                'genre' => $genre ? [$genre] : [],
                 'thumbnailUrl' => $e->getThumbnailUrl(),
                 'author' => [],
             ];
@@ -182,20 +191,39 @@ and i.publicationcode=:code", $rsm)
                     $rec['alternateName'] = $story->getTitle();
                 }
             }
-            foreach($e->getJobs() as $j) {
-                $rec['author'][] = [
-                    '@type' => 'Role',
-                    'roleName' => $j->getRoleName(),
-                    'author' => [
+            $plotwri = [];
+            $artink = [];
+            foreach($e->getStoryversion()->getJobs() as $j) {
+                if ($j->getPerson()->getFullname() != '?') {
+                    $person = [
                         '@type' => 'Person',
                         '@id' => $this->generateUrl('person_detail', [
                             'personcode' => urlencode($j->getPerson()->getPersoncode())
                         ], UrlGeneratorInterface::ABSOLUTE_URL),
                         'name' => $j->getPerson()->getFullname()
-                    ]
-                ];
+                    ];
+                    if ($j->getRoleName() == 'plot' || $j->getRoleName() == 'writer') {
+                        $rec['author'][] = $person;
+                        $plotwri[$person['@id']] = $person;
+                    } elseif ($j->getRoleName() == 'artist') {
+                        $rec['penciler'][] = $person;
+                        $artink[$person['@id']] = $person;
+                    } elseif ($j->getRoleName() == 'inker') {
+                        $rec['inker'][] = $person;
+                        $artink[$person['@id']] = $person;
+                    }
+                }
             }
-            
+            // collapse penciler and inker if they are the same
+            if (count($artink) == 1) {
+                $rec['artist'] = [array_pop($artink)];
+                unset($rec['penciler']);
+                unset($rec['inker']);
+            }
+            // collapse plot/writer in single author array
+            if (count($plotwri) == 1) {
+                $rec['author'] = [array_pop($plotwri)];
+            }
             $i['hasPart'][] = $rec;
         }
         $r = new Response(json_encode($i));
