@@ -150,7 +150,7 @@ and i.publicationcode=:code", $rsm)
                 'name' => $is->getPublication()->getTitle()
             ],
             'comment' => $is->getIssuecomment(),
-            'pagination' => $is->getPages(),
+            'cbo:pageCount' => $is->getPages(),
             'hasPart' => [],
             #'thumbnailUrl' => $is->getThumbnailUrl(),
             'url' => self::COA_URL . "issue.php?c=" . urlencode($is->getIssuecode()),
@@ -177,11 +177,15 @@ and i.publicationcode=:code", $rsm)
                 'name' => $e->getTitle(),
                 'inLanguage' => $e->getLanguagecode(),
                 'comment' => $e->getEntrycomment(),
-                'position' => $e->getPosition(),
+                'position' => $e->getPosition(),                
                 #'thumbnailUrl' => $e->getThumbnailUrl(),
                 'author' => [],                
             ];
 
+            // page count
+            if ($e->getStoryversion()->getEntirepages() > 0) {
+                $rec['cbo:pageCount'] = $e->getStoryversion()->getEntirepages();
+            }
             // date of first publication
             if ($e->getStoryversion()->getStory()->getStorycode()) {
                 $rec['datePublished'] = $e->getStoryversion()->getStory()->getFirstpublicationdate();
