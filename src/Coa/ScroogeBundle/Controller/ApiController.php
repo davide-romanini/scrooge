@@ -152,7 +152,7 @@ and i.publicationcode=:code", $rsm)
             'comment' => $is->getIssuecomment(),
             'pagination' => $is->getPages(),
             'hasPart' => [],
-            'thumbnailUrl' => $is->getThumbnailUrl(),
+            #'thumbnailUrl' => $is->getThumbnailUrl(),
             'url' => self::COA_URL . "issue.php?c=" . urlencode($is->getIssuecode()),
         ]);
         /* @var $e Entry */
@@ -178,10 +178,21 @@ and i.publicationcode=:code", $rsm)
                 'inLanguage' => $e->getLanguagecode(),
                 'comment' => $e->getEntrycomment(),
                 'position' => $e->getPosition(),
-                'thumbnailUrl' => $e->getThumbnailUrl(),
-                'author' => [],
+                #'thumbnailUrl' => $e->getThumbnailUrl(),
+                'author' => [],                
             ];
+
+            // date of first publication
+            if ($e->getStoryversion()->getStory()->getStorycode()) {
+                $rec['datePublished'] = $e->getStoryversion()->getStory()->getFirstpublicationdate();
+            }
             
+            // entries with "part" treated as Episodes
+            if ($e->getPart()) {
+                $rec['@type'] = [$rec['@type'], 'Episode'];
+                $rec['episodeNumber'] = $e->getPart();
+            }
+
             if($e->getStoryversion()->getStory()->getStorycode()) {
                 $story = $e->getStoryversion()->getStory();
                 $rec['exampleOfWork'] = $this->generateUrl('story_detail', [
@@ -224,6 +235,21 @@ and i.publicationcode=:code", $rsm)
             if (count($plotwri) == 1) {
                 $rec['author'] = [array_pop($plotwri)];
             }
+
+            // characters
+            foreach ($e->getStoryversion()->getAppearances() as $a) {
+                // use localized names relative to entry language
+                // this seems logical and aligned with the original web version of coa
+                $characterName = $a->getCharacter()->getCharactername();
+                if ($e->getStoryversion()->getStory()->getStorycode() && $e->getLanguagecode()) {
+                    $characterName = $a->getCharacter()->getLocalizedName($e->getLanguagecode());
+                }
+                $rec['character'][] = [
+                    '@type' => 'Person',
+                    'name' => $characterName,
+                ];
+            }
+
             $i['hasPart'][] = $rec;
         }
         $r = new Response(json_encode($i));
