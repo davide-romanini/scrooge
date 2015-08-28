@@ -53,6 +53,11 @@ class StoryVersion
     private $brokenpageunspecified;
     
     // i=illustration c=cover, n=normal, a=article
+    // n = normal, k = newspaper strip, c = cover, i = illustration, a = article, P = painting
+    // f = ??
+    // g = ??
+    // t = ??
+    // L = ??
     /** @ORM\Column **/
     private $kind;
     /** @ORM\Column **/
@@ -146,6 +151,13 @@ class StoryVersion
     
     public function isIllustration()
     {
-        return $this->kind == 'i';
+        //i=illustration 
+        //P=painting
+        return $this->kind == 'i' || $this->kind == 'P';
+    }
+
+    public function isUnknown()
+    {
+        return in_array($this->kind, ['f', 'g', 't', 'L']);
     }
 }

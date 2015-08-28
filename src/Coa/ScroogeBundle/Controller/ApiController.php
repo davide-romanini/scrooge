@@ -48,6 +48,7 @@ class ApiController extends Controller
         $r->headers->set('Content-type', 'application/ld+json');
         return $r;
     }
+
     /**
      * @Route("series/{countrycode}/{localcode}", name="series_detail") 
      */
@@ -92,7 +93,43 @@ and i.publicationcode=:code", $rsm)
         $r->headers->set('Content-type', 'application/ld+json');
         return $r;
     }
-    
+
+    /**
+     * @Route("series/{countrycode}/{localcode}/issues", name="series_issues_list")
+     */
+    public function seriesIssuesListAction(Request $req, $countrycode, $localcode)
+    {
+        $publicationcode = "$countrycode/$localcode";
+
+        /* @var $pub Publication */
+        $issues = $this->getDoctrine()->getManager()->getRepository("CoaScroogeBundle:Issue")
+                ->findBy([
+                    'publication' => $publicationcode
+                ], [
+                    'oldestdate' => 'asc',
+                    'issuenumber' => 'asc'
+                ]);
+        $ret = [];
+        foreach ($issues as $i) {
+            $ret[] = [
+                '@type' => 'ComicIssue',
+                '@id' => $this->generateUrl('issue_detail', [
+                    'countrycode' => $countrycode,
+                    'localcode' => $localcode,
+                    'issuenumber' => $i->getIssuenumber()
+                ], UrlGeneratorInterface::ABSOLUTE_URL),
+                'dc:identifier' => $i->getIssuecode(),
+                'issueNumber' => $i->getIssuenumber(),
+                'datePublished' => $i->getOldestdate(),
+                'name' => $i->getTitle(),
+            ];
+        }
+        // todo: missing json-ld context!
+        $r = new Response(json_encode($ret));
+        $r->headers->set('Content-type', 'application/ld+json');
+        return $r;
+    }
+
     /**
      * @Route("/stories/", name="story_list") 
      */
@@ -157,6 +194,7 @@ and i.publicationcode=:code", $rsm)
         ]);
         /* @var $e Entry */
         foreach($is->getEntries() as $e) {
+            #print $e->getEntrycode() . " -- " . $e->getStoryversion()->getKind() . "\n\n";
             $type = '';
             if ($e->getStoryversion()->isArticle()) {
                 $type = 'Article';
@@ -164,6 +202,8 @@ and i.publicationcode=:code", $rsm)
                 $type = "ComicCoverArt";
             } elseif ($e->getStoryversion()->isIllustration()) {
                 $type = "VisualArtwork";
+            } elseif ($e->getStoryversion()->isUnknown()) {
+                $type = "CreativeWork";
             } else {
                 // a story by default
                 $type = "ComicStory";
@@ -179,9 +219,12 @@ and i.publicationcode=:code", $rsm)
                 'comment' => $e->getEntrycomment(),
                 'position' => $e->getPosition(),                
                 #'thumbnailUrl' => $e->getThumbnailUrl(),
-                'author' => [],                
+                'author' => [],
             ];
 
+            if($e->getStoryversion()->getStory()->getStorycode()) {
+                $rec['url'] = self::COA_URL . "s.php?c=" . urlencode($e->getStoryversion()->getStory()->getStorycode());
+            }
             // page count
             if ($e->getStoryversion()->getEntirepages() > 0) {
                 $rec['cbo:pageCount'] = $e->getStoryversion()->getEntirepages();
@@ -242,12 +285,17 @@ and i.publicationcode=:code", $rsm)
 
             // characters
             foreach ($e->getStoryversion()->getAppearances() as $a) {
+                $characterName = '';
                 // use localized names relative to entry language
                 // this seems logical and aligned with the original web version of coa
-                $characterName = $a->getCharacter()->getCharactername();
                 if ($e->getStoryversion()->getStory()->getStorycode() && $e->getLanguagecode()) {
                     $characterName = $a->getCharacter()->getLocalizedName($e->getLanguagecode());
                 }
+                // fallback to default character name
+                if (!$characterName) {
+                    $characterName = $a->getCharacter()->getCharactername();
+                }
+                
                 $rec['character'][] = [
                     '@type' => 'Person',
                     'name' => $characterName,
