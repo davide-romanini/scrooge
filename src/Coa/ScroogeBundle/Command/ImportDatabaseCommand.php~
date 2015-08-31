@@ -45,7 +45,7 @@ class ImportDatabaseCommand extends ContainerAwareCommand
         }
         if (!$db) {
             $db = tempnam(sys_get_temp_dir(), 'coa_');
-            $output->writeln("Creating database schema into [$db]");
+            $output->writeln("Creating database schema into [$dbTempFile]");
             $this->initDb($db);
         } else {
             $this->initDb($db, false);
@@ -88,7 +88,7 @@ class ImportDatabaseCommand extends ContainerAwareCommand
     private function import($isv, $out, $tables = null)
     {
         $table = basename($isv, '.isv');
-        if ($tables !== null && !in_array($table, $tables)) {
+        if ($tables != null && !in_array($table, $tables)) {
             $out->writeln("Skipping table $table, not in list");
             return;
         }
