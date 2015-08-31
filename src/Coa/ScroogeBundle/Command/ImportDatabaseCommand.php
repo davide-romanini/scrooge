@@ -56,11 +56,11 @@ class ImportDatabaseCommand extends ContainerAwareCommand
             $output->writeln("Importing [$isv]...");
             $this->import($isv, $output, $tables);
         }
-        $output->writeln('Generating Full Text Indexes...');
+        /*$output->writeln('Generating Full Text Indexes...');
         $fts = file_get_contents($this->getContainer()->getParameter('kernel.root_dir') . '/inducks_fts.sql');
         $this->db->beginTransaction();
         $this->db->exec($fts);
-        $this->db->commit();
+        $this->db->commit();*/
         $this->db->close();
         $prodDb = $this->getContainer()->getParameter('database_path');
         $output->writeln('Replacing production database');
