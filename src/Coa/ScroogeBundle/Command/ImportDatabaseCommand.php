@@ -38,7 +38,7 @@ class ImportDatabaseCommand extends ContainerAwareCommand
                                OutputInterface $output)
     {
         $db = $input->getOption('db');
-        $tables = $input->hasOption('tables') ? explode(',', $input->getOption('tables')) : null;
+        $tables = $input->getOption('tables') ? explode(',', $input->getOption('tables')) : null;
         $uri = "http://coa.inducks.org/inducks/isv";
         if ($input->getOption('uri')) {
             $uri = $input->getOption('uri');
@@ -88,6 +88,7 @@ class ImportDatabaseCommand extends ContainerAwareCommand
     private function import($isv, $out, $tables = null)
     {
         $table = basename($isv, '.isv');
+        print_r($tables);
         if ($tables !== null && !in_array($table, $tables)) {
             $out->writeln("Skipping table $table, not in list");
             return;
