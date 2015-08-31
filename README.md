@@ -29,9 +29,7 @@ be imported and converted to sqlite3:
  $ php app/console coa:import
 ```
 
-Read the script comments for usage.
-
-For full text indexing, run the inducks_fts.sql script after importing data.
+NB: actually full text index has been disabled, since on my demo openshift deployment it does not work.
 
 TODO:
 ----
