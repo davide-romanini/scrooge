@@ -284,22 +284,26 @@ and i.publicationcode=:code", $rsm)
             }
 
             // characters
-            foreach ($e->getStoryversion()->getAppearances() as $a) {
+            foreach ($e->getStoryversion()->getAppearances() as $a) {                
                 $characterName = '';
-                // use localized names relative to entry language
-                // this seems logical and aligned with the original web version of coa
-                if ($e->getStoryversion()->getStory()->getStorycode() && $e->getLanguagecode()) {
-                    $characterName = $a->getCharacter()->getLocalizedName($e->getLanguagecode());
+                try {
+                    // use localized names relative to entry language
+                    // this seems logical and aligned with the original web version of coa
+                    if ($e->getStoryversion()->getStory()->getStorycode() && $e->getLanguagecode()) {
+                        $characterName = $a->getCharacter()->getLocalizedName($e->getLanguagecode());
+                    }
+                    // fallback to default character name
+                    if (!$characterName) {
+                        $characterName = $a->getCharacter()->getCharactername();
+                    }
+                    
+                    $rec['character'][] = [
+                        '@type' => 'Person',
+                        'name' => $characterName,
+                    ];
+                } catch(\Exception $ex) {
+                    // ignore this, since there are a lot of broken appearances
                 }
-                // fallback to default character name
-                if (!$characterName) {
-                    $characterName = $a->getCharacter()->getCharactername();
-                }
-                
-                $rec['character'][] = [
-                    '@type' => 'Person',
-                    'name' => $characterName,
-                ];
             }
 
             $i['hasPart'][] = $rec;
