@@ -38,14 +38,14 @@ class ImportDatabaseCommand extends ContainerAwareCommand
                                OutputInterface $output)
     {
         $db = $input->getOption('db');
-        $tables = $input->getOption('tables') ? explode(',', $input->getOption('tables')) : null;
+        $tables = $input->hasOption('tables') ? explode(',', $input->getOption('tables')) : null;
         $uri = "http://coa.inducks.org/inducks/isv";
         if ($input->getOption('uri')) {
             $uri = $input->getOption('uri');
         }
         if (!$db) {
             $db = tempnam(sys_get_temp_dir(), 'coa_');
-            $output->writeln("Creating database schema into [$db]");
+            $output->writeln("Creating database schema into [$dbTempFile]");
             $this->initDb($db);
         } else {
             $this->initDb($db, false);
@@ -56,11 +56,11 @@ class ImportDatabaseCommand extends ContainerAwareCommand
             $output->writeln("Importing [$isv]...");
             $this->import($isv, $output, $tables);
         }
-        /*$output->writeln('Generating Full Text Indexes...');
+        $output->writeln('Generating Full Text Indexes...');
         $fts = file_get_contents($this->getContainer()->getParameter('kernel.root_dir') . '/inducks_fts.sql');
         $this->db->beginTransaction();
         $this->db->exec($fts);
-        $this->db->commit();*/
+        $this->db->commit();
         $this->db->close();
         $prodDb = $this->getContainer()->getParameter('database_path');
         $output->writeln('Replacing production database');
@@ -88,8 +88,7 @@ class ImportDatabaseCommand extends ContainerAwareCommand
     private function import($isv, $out, $tables = null)
     {
         $table = basename($isv, '.isv');
-        print_r($tables);
-        if ($tables !== null && !in_array($table, $tables)) {
+        if ($tables != null && !in_array($table, $tables)) {
             $out->writeln("Skipping table $table, not in list");
             return;
         }

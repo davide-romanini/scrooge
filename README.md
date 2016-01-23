@@ -11,10 +11,11 @@ classes defined in the (draft) comic extensions described here:
 
 Examples:
 
- - `/series/us/US` -> Uncle Scrooge series 
- - `/series/us/US/issues/5` -> Issue #5 for Uncle Scrooge (with contained story informations)
+ - [`/series/us/US`](http://scrooge-nkap.rhcloud.com/series/us/US) -> Uncle Scrooge series 
+ - [`/series/us/US/issues`](http://scrooge-nkap.rhcloud.com/series/us/US/issues) -> All Uncle Scrooge issues
+ - [`/series/us/US/issues/5`](http://scrooge-nkap.rhcloud.com/series/us/US/issues/5) -> Issue #5 for Uncle Scrooge (with contained story informations) 
  - `/series/?q=uncle+scrooge` -> Search series containing the terms uncle scrooge in the title
- - `/stories/W+US++++5-02` -> "The secret of Atlantis" Carl Barks story (with backlinks to issues printing it)
+ - [`/stories/W+US++++5-02`](http://scrooge-nkap.rhcloud.com/stories/W+US++++5-02) -> "The secret of Atlantis" Carl Barks story (with backlinks to issues printing it)
  - `/stories/?q=atlantis` -> Search stories containing the term atlantis in the title. Looks also for translated titles in related entries
 
 
@@ -22,13 +23,13 @@ Installation
 ------------
 
 Any symfony2 supporting php server should be fine. The full inducks database must
-be imported and converted to sqlite3. You can use the script located here:
+be imported and converted to sqlite3:
 
-  https://gist.githubusercontent.com/davide-romanini/be55163e68c432e85c64/raw/0d217bfdda54a869c8ee603b67d20ebb8f9a96cd/inducks_unpack.sh
+```
+ $ php app/console coa:import
+```
 
-Read the script comments for usage.
-
-For full text indexing, run the inducks_fts.sql script after importing data.
+NB: actually full text index has been disabled, since on my demo openshift deployment it does not work.
 
 TODO:
 ----
@@ -36,7 +37,6 @@ TODO:
  - export character informations
  - general architecture cleanup
  - refine model mapping
- - automate database import
 
 Contribute:
 ----------
