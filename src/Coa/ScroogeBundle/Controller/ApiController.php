@@ -29,7 +29,7 @@ class ApiController extends Controller
         $rsm = new \Doctrine\ORM\Query\ResultSetMappingBuilder($this->getDoctrine()->getManager());
         $rsm->addRootEntityFromClassMetadata('CoaScroogeBundle:Publication', 'p');
         $series = $this->getDoctrine()->getManager()
-            ->createNativeQuery("SELECT p.* FROM inducks_publication p, publication_fts p1 WHERE p.publicationcode=p1.publicationcode AND p1.content MATCH :q", $rsm)
+            ->createNativeQuery("SELECT p.* FROM inducks_publication p WHERE MATCH (title) AGAINST (:q) LIMIT 100", $rsm)
             ->setParameter('q', $q)
             ->getResult();
         $ret = [];
@@ -139,7 +139,7 @@ and i.publicationcode=:code", $rsm)
         $rsm = new \Doctrine\ORM\Query\ResultSetMappingBuilder($this->getDoctrine()->getManager());
         $rsm->addRootEntityFromClassMetadata('CoaScroogeBundle:Story', 's');
         $stories = $this->getDoctrine()->getManager()
-            ->createNativeQuery("SELECT s.* FROM inducks_story s, story_fts s1 WHERE s.storycode=s1.storycode AND s1.content MATCH :q", $rsm)
+            ->createNativeQuery("SELECT s.* FROM inducks_story s WHERE MATCH (title,repcountrysummary) AGAINST(:q) LIMIT 100", $rsm)
             ->setParameter('q', $q)
             ->getResult();
         $ret = [];
