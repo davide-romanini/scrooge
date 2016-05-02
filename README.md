@@ -4,10 +4,12 @@ S.C.R.O.O.G.E.
 Exposes the [Inducks][1] database through a REST interface. 
 This is *very alpha* stage. It could be useful for comic related programs (taggers, viewers...)
 but also for semantic applications mashing up different sources.
-Data is exported in JSON-LD using http://schema.org data model, with support for additional
-classes defined in the (draft) comic extensions described here: 
+Data is exported in JSON-LD using http://bib.schema.org data model, specifically 
+[ComicSeries](http://bib.schema.org/ComicSeries), [ComicStory](http://bib.schema.org/ComicStory) 
+and related metadata.
 
-  http://www.w3.org/community/schemabibex/wiki/Periodicals_and_Comics_synthesis
+Parts of the Comic Book Ontology (https://comicmeta.org/cbo/) and Dublin Core (http://purl.org/dc/elements/1.1/)
+are also used.
 
 Examples:
 
@@ -23,20 +25,15 @@ Installation
 ------------
 
 Any symfony2 supporting php server should be fine. The full inducks database must
-be imported and converted to sqlite3:
+be imported. There's a cron job in `.openshift/cron/daily/updatedb.sh` wrote specifically
+to be executed inside an openshift environment. It should be easy to change for local
+mysql deployment.
 
-```
- $ php app/console coa:import
-```
-
-NB: actually full text index has been disabled, since on my demo openshift deployment it does not work.
-
-TODO:
-----
-
- - export character informations
- - general architecture cleanup
- - refine model mapping
+Some notes:
+ - this mysql configuration is required: `lower_case_table_names=1`
+   On openshift you must set with `rhc env set OPENSHIFT_MYSQL_LOWER_CASE_TABLE_NAMES=1 -a <app> && rhc cartridge restart -c mysql-5.5 -a <app>`
+ - you must create a database named `coa` and it must be in UTF8. You can change it with:
+   `ALTER DATABASE databasename CHARACTER SET utf8 COLLATE utf8_unicode_ci;`
 
 Contribute:
 ----------
