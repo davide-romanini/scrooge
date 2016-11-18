@@ -18,7 +18,7 @@ Examples:
  - [`/series/us/US/issues/5`](http://scrooge-nkap.rhcloud.com/series/us/US/issues/5) -> Issue #5 for Uncle Scrooge (with contained story informations) 
  - [`/series/?q=uncle+scrooge`](http://scrooge-nkap.rhcloud.com/series/?q=uncle+scrooge) -> Search series containing the terms uncle scrooge in the title
  - [`/stories/W+US++++5-02`](http://scrooge-nkap.rhcloud.com/stories/W+US++++5-02) -> "The secret of Atlantis" Carl Barks story (with backlinks to issues printing it)
- - [`/stories/?q=atlantis`](http://scrooge-nkap.rhcloud.com/stories/?q=uncle+scrooge) -> Search stories containing the term atlantis in the title. Looks also for translated titles in related entries
+ - [`/stories/?q=atlantis`](http://scrooge-nkap.rhcloud.com/stories/?q=atlantis) -> Search stories containing the term atlantis in the title. Looks also for translated titles in related entries
 
 
 Installation
