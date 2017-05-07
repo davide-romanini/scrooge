@@ -21,7 +21,7 @@ class StoryVersion
     private $storyversioncode;
     
     /**
-     * @ORM\ManyToOne(targetEntity="Story")
+     * @ORM\ManyToOne(targetEntity="Story", inversedBy="versions")
      * @ORM\JoinColumn(name="storycode", referencedColumnName="storycode")
      */
     private $story;
