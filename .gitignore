@@ -17,3 +17,4 @@
 /composer.phar
 /nbproject/private/
 /symfony
+/app/config/.env
