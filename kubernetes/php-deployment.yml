@@ -1,0 +1,55 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: scrooge-php
+  # these labels can be applied automatically
+  # from the labels in the pod template if not set
+  # labels:
+  #   app: guestbook
+  #   tier: frontend
+spec:
+  # this replicas value is default
+  # modify it according to your case
+  replicas: 1
+  # selector can be applied automatically
+  # from the labels in the pod template if not set
+  # selector:
+  #   matchLabels:
+  #     app: guestbook
+  #     tier: frontend
+  template:
+    metadata:
+      labels:
+        app: scrooge-php
+        tier: frontend
+    spec:
+      containers:
+      - name: scrooge-http
+        image: gcr.io//scrooge-http:v1
+      - ports:
+        - containerPort: 80
+      - name: scrooge-php
+        image: gcr.io//scrooge-php:v1
+#        resources:
+#          requests:
+#            cpu: 100m
+#            memory: 100Mi
+        env:
+        - name: SYMFONY_DEBUG
+          value: 0
+        - name: SYMFONY_ENV
+          value: prod
+        - name: SF_SECRET
+          value: THISISNotSoSecret
+        - name: DATABASE_HOST
+          value: coa-db
+        - name: DATABASE_PORT
+          value: 3306
+        - name: DATABASE_NAME
+          value: coa
+        - name: DATABASE_USER
+          value: coa
+        - name: DATABASE_PASSWORD
+          value: coa
+        ports:
+        - containerPort: 9000
