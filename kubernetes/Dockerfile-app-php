@@ -1,4 +1,4 @@
-FROM dromanin/php71-base
+FROM davideromanini/scrooge-php
 
 COPY . /var/www
 COPY ./kubernetes/php-fpm.conf /etc/php7/php-fpm.conf

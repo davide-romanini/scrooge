@@ -15,7 +15,6 @@ RUN set -xe; \
 
 ENTRYPOINT ["tini", "--"]
 
-VOLUME /var/www
 WORKDIR /var/www
 
 CMD ["php-fpm7", "-F"]

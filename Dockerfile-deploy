@@ -1,0 +1,4 @@
+FROM davideromanini/scrooge-php
+ADD . /var/www
+
+CMD ["php7", "-S", "0.0.0.0:80"]
