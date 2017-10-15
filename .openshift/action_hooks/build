@@ -1,2 +1,0 @@
-cd $OPENSHIFT_REPO_DIR
-php `find -name build_bootstrap.php`

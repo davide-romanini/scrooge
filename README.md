@@ -1,8 +1,8 @@
 S.C.R.O.O.G.E.
 ==============
 
-Exposes the [Inducks][1] database through a REST interface. 
-This is *very alpha* stage. It could be useful for comic related programs (taggers, viewers...)
+Exposes part of the [Inducks][1] database through a REST interface. 
+It could be useful for comic related programs (taggers, viewers...)
 but also for semantic applications mashing up different sources.
 Data is exported in JSON-LD using http://bib.schema.org data model, specifically 
 [ComicSeries](http://bib.schema.org/ComicSeries), [ComicStory](http://bib.schema.org/ComicStory) 
@@ -20,25 +20,20 @@ Examples:
  - [`/stories/W+US++++5-02`](http://scrooge-nkap.rhcloud.com/stories/W+US++++5-02) -> "The secret of Atlantis" Carl Barks story (with backlinks to issues printing it)
  - [`/stories/?q=atlantis`](http://scrooge-nkap.rhcloud.com/stories/?q=atlantis) -> Search stories containing the term atlantis in the title. Looks also for translated titles in related entries
 
+Install:
+-------
+To run the application locally (requires docker and docker-compose installed):
 
-Installation
-------------
+```
+  ./make build
+  ./make start
+```
 
-Any symfony2 supporting php server should be fine. The full inducks database must
-be imported. There's a cron job in `.openshift/cron/daily/updatedb.sh` wrote specifically
-to be executed inside an openshift environment. It should be easy to change for local
-mysql deployment.
+To update the local coa database:
 
-Some notes:
- - this mysql configuration is required: `lower_case_table_names=1`
-   On openshift you must set with `rhc env set OPENSHIFT_MYSQL_LOWER_CASE_TABLE_NAMES=1 -a <app> && rhc cartridge restart -c mysql-5.5 -a <app>`
- - you must create a database named `coa` and it must be in UTF8. You can change it with:
-   `ALTER DATABASE databasename CHARACTER SET utf8 COLLATE utf8_unicode_ci;`
-
-Contribute:
-----------
-
-Try it, host it, fork it! If you have suggestions, open an issue!
+```
+  ./make update-local-db
+```
 
 Disclaimer:
 ----------
@@ -47,5 +42,5 @@ The data presented here is based on information from the freely available
 [Inducks][1] database.
 
 
-[1]:  http://inducks.org
+[1]:  https://inducks.org
 
