@@ -4,8 +4,12 @@ function start {
 }
 
 function build {
-    composer install -o --apcu-autoloader
+    composer install -o --apcu-autoloader --no-dev
     echo $(version) > VERSION
+}
+
+function build-dev {
+    composer install
 }
 
 function version() {
