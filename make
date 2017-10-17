@@ -4,7 +4,13 @@ function start {
 }
 
 function build {
-    composer install
+    composer install -o --apcu-autoloader
+    echo $(version) > VERSION
+}
+
+function version() {
+  # https://stackoverflow.com/questions/3300746/deriving-application-build-version-from-git-describe-how-to-get-a-relatively
+  git describe --exact-match 2> /dev/null || echo "`git symbolic-ref HEAD 2> /dev/null | cut -b 12-`-`git log --pretty=format:\"%h\" -1`"
 }
 
 function composer {
