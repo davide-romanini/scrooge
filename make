@@ -27,8 +27,8 @@ function composer {
 
 # init / updates the full coa db for local development
 function update-local-db {
-    docker run --rm -u www-data -ti -v $(pwd):/var/www -e MYSQL_USER=coa -e \
-           MYSQL_HOST=db -e MYSQL_PASSWORD=coa davideromanini/scrooge-php ./bin/updatedb.sh
+    docker-compose run --rm -u www-data -e MYSQL_USER=coa -e \
+           MYSQL_HOST=db -e MYSQL_PASSWORD=coa php ./bin/updatedb.sh
 }
 
 # build docker images
