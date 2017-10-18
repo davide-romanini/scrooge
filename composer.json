@@ -38,6 +38,7 @@
     },
     "scripts": {
         "symfony-scripts": [
+            "if [ ! -f app/config/.env ]; then cp app/config/.env.dist app/config/.env; fi",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
