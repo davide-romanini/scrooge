@@ -1,3 +1,0 @@
-FROM nginx
-ADD ./kubernetes/nginx.conf /etc/nginx/conf.d/default.conf
-ADD ./web /var/www/web

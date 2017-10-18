@@ -1,4 +1,7 @@
 #!/bin/bash
+set -o nounset
+set -o errexit
+
 function start {
     docker-compose up -d
 }
@@ -26,6 +29,21 @@ function composer {
 function update-local-db {
     docker run --rm -u www-data -ti -v $(pwd):/var/www -e MYSQL_USER=coa -e \
            MYSQL_HOST=db -e MYSQL_PASSWORD=coa davideromanini/scrooge-php ./bin/updatedb.sh
+}
+
+# build docker images
+function build-docker-images {
+  appdir=.
+  appversion=$(cat VERSION)
+  echo "Building version $appversion"
+  docker build -t davideromanini/scrooge-static:$appversion -f $appdir/.docker/Dockerfile.static $appdir
+  docker build -t davideromanini/scrooge-app:$appversion -f $appdir/.docker/Dockerfile.app $appdir
+}
+
+function push-docker-images {
+  appversion=$(cat VERSION)
+  docker push davideromanini/scrooge-static:$appversion
+  docker push davideromanini/scrooge-app:$appversion
 }
 
 func=$1
