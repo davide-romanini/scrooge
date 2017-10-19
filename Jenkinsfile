@@ -21,9 +21,13 @@ pipeline {
 
         stage('Push docker images') {
             steps {
-                echo 'Building docker images..'
-                sh './make push-docker-images'
-                echo 'Done!'
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                    sh 'docker login -u $USER -p $PASS'
+                    echo 'Building docker images..'
+                    sh './make push-docker-images'
+                    echo 'Done!'
+                }
+                
             }
         }
     }
