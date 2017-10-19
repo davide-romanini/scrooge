@@ -1,11 +1,13 @@
 pipeline {
-    agent any
+    agent {
+        docker { image 'davide-romanini/scrooge-php' }
+    }
 
     stages {
         stage('Build') {
             steps {
                 echo 'Building..'
-                sh './make build'
+                sh 'composer install -o --apcu-autoloader --no-dev'
             }
         }
     }
