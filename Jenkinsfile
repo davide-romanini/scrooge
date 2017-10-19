@@ -1,6 +1,9 @@
 pipeline {
     agent {
-        docker { image 'davideromanini/scrooge-php' }
+        docker { 
+            image 'davideromanini/scrooge-php' 
+            args '-u www-data'
+        }
     }
 
     stages {
