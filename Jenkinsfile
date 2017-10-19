@@ -18,5 +18,13 @@ pipeline {
                 echo 'Done!'
             }
         }
+
+        stage('Push docker images') {
+            steps {
+                echo 'Building docker images..'
+                sh './make push-docker-images'
+                echo 'Done!'
+            }
+        }
     }
 }
