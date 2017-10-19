@@ -22,7 +22,7 @@ function version() {
 
 function composer {
     # better run without docker-compose
-    docker run --rm -u www-data -ti -v $(pwd):/var/www davideromanini/scrooge-php composer $@
+    docker run --rm -u www-data -t -v $(pwd):/var/www davideromanini/scrooge-php composer $@
 }
 
 # init / updates the full coa db for local development
