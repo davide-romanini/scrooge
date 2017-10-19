@@ -10,7 +10,7 @@ pipeline {
             }
         }
 
-        stage('Build docker images) {
+        stage('Build docker images') {
             steps {
                 echo 'Building docker images..'
                 sh './make build-docker-images'
