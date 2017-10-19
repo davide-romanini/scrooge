@@ -20,9 +20,8 @@ function version() {
   git describe --exact-match 2> /dev/null || echo "`git symbolic-ref HEAD 2> /dev/null | cut -b 12-`-`git log --pretty=format:\"%h\" -1`"
 }
 
-function composer {
-    # better run without docker-compose
-    docker run --rm -u www-data -t -v $(pwd):/var/www davideromanini/scrooge-php composer $@
+function composer {    
+    docker run --rm -u $(id -u):$(id -g) -t -v $(pwd):/var/www davideromanini/scrooge-php composer $@
 }
 
 # init / updates the full coa db for local development
