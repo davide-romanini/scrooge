@@ -8,6 +8,7 @@ pipeline {
                 sh './make build'
                 sh 'echo OK version $(cat VERSION) built!'
                 echo 'Changed from WEBHOOK AGAIN'
+                echo 'Another stupid test'
             }
         }
 
