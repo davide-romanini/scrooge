@@ -5,21 +5,19 @@ imports:
 #    validation:
 #        cache: apc
 
-#doctrine:
-#    orm:
-#        metadata_cache_driver: apc
-#        result_cache_driver: apc
-#        query_cache_driver: apc
+doctrine:
+    orm:
+        metadata_cache_driver: apcu
+        result_cache_driver: apcu
+        query_cache_driver: apcu
 
 monolog:
     handlers:
         main:
             type:         fingers_crossed
             action_level: error
-            handler:      nested
-        nested:
+            handler:      err
+        err:
             type:  stream
-            path:  "%kernel.logs_dir%/%kernel.environment%.log"
+            path:  "php://stderr"
             level: debug
-        console:
-            type:  console

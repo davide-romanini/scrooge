@@ -1,0 +1,3 @@
+FROM davideromanini/nginx-php
+
+ADD ./web /var/www/web

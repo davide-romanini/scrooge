@@ -1,0 +1,56 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: scrooge-php
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: scrooge-php
+        tier: frontend
+    spec:
+      containers:
+      - name: scrooge-http
+        image: davideromanini/scrooge-nginx:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+#        volumeMounts:
+#        - name: cfg-nginx
+#          mountPath: /etc/nginx/conf.d/default.conf
+#          subPath: nginx.conf
+        ports:
+        - containerPort: 80
+      - name: scrooge-php
+        image: davideromanini/scrooge-app:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+        env:
+        - name: SYMFONY_DEBUG
+          value: "0"
+        - name: SYMFONY_ENV
+          value: prod
+        - name: SF_SECRET
+          value: THISISNotSoSecret
+        - name: DATABASE_HOST
+          value: scrooge-db
+        - name: DATABASE_PORT
+          value: "3306"
+        - name: DATABASE_NAME
+          value: coa
+        - name: DATABASE_USER
+          value: coa
+        - name: DATABASE_PASSWORD
+          value: coa
+#        ports:
+#        - containerPort: 9000
+#      volumes:
+#        - name: cfg-nginx
+#          configMap:
+#            name: scrooge-cfg

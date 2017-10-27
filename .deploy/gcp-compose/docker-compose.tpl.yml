@@ -1,0 +1,47 @@
+version: "3"
+
+services:
+  nginx:
+    image: davideromanini/scrooge-static:${appversion}
+    environment:
+      PHP_HOST: "php"
+      DOCUMENT_ROOT: /var/www/web
+      NGINX_SENDFILE: "on"
+    depends_on:
+      - php
+    ports:
+      - 80:80
+  php:
+    image: davideromanini/scrooge-app:${appversion}
+    environment:
+      SYMFONY_DEBUG: 0
+      SYMFONY_ENV: prod
+      SF_SECRET: ${sf_secret}
+      DATABASE_HOST: db
+      DATABASE_PORT: 3306
+      DATABASE_NAME: coa
+      DATABASE_USER: coa
+      DATABASE_PASSWORD: coa
+    expose:
+      - 9000
+    depends_on:
+      - db
+  db:
+    image: mysql:5.5
+    environment:
+      MYSQL_DATABASE: coa
+      MYSQL_USER: coa
+      MYSQL_PASSWORD: coa
+      MYSQL_ROOT_PASSWORD: coa
+    command: [
+        "mysqld", 
+        "--lower_case_table_names=1", 
+        "--character-set-server=utf8", 
+        "--collation-server=utf8_unicode_ci"
+    ]
+    
+  updater:
+    image: davideromanini/scrooge-app:${appversion}
+    command: sh -c 'ntpd -p pool.ntp.org && echo "0 3 * * * MYSQL_USER=coa MYSQL_HOST=db MYSQL_PASSWORD=coa /var/www/bin/updatedb.sh" | crontab - && crond -f'
+    
+
