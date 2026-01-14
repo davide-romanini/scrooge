@@ -1,6 +1,8 @@
 ---
 deployment:
   tasks:
-    - echo $(pwd)
-    - ls -l $(pwd)/../../public_html
+    - php -r "copy('https://getcomposer.org/download/2.9.3/composer.phar', '$(pwd)/../../composer.phar');"
+    - rsync -av $(pwd) $(pwd)/../../www
+    - cd $(pwd)/../../www/scrooge && php -r $(pwd)/../../composer.phar install -o --apcu-autoloader --no-dev
+
 
