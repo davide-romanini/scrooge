@@ -1,0 +1,6 @@
+---
+deployment:
+  tasks:
+    - echo $(pwd)
+    - ls -l $(pwd)/../../public_html
+
